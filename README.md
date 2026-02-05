@@ -58,3 +58,5 @@ Docs
 Status
 
 This is a learning and engineering portfolio project. The contracts are not audited and are not intended for production use without independent review.
+
+Commits follow Conventional Commits [specs](https://www.conventionalcommits.org/en/v1.0.0/)
