@@ -16,14 +16,29 @@ import {EmergencyModule} from "./EmergencyModule.sol";
 /// - ERC-4626 compliant tokenized vault
 /// - Role-based access control (Owner, Guardian, Operator)
 /// - Emergency states (Normal, Paused, Withdraw-Only)
+/// - Sweep function to recover accidentally-sent tokens
 ///
 /// Security Properties:
 /// - Guardian can pause or set withdraw-only mode
 /// - Only Owner can unpause/return to normal
 /// - Users can always eventually withdraw (no permanent fund lock)
 /// - Rounding always favors the vault
+/// - Cannot sweep the vault's underlying asset (protects user deposits)
 contract GuardedVault is ERC4626, VaultAccessControl, EmergencyModule {
     using SafeERC20 for IERC20;
+
+    // ============ Errors ============
+
+    /// @notice Thrown when trying to sweep the vault's underlying asset
+    error CannotSweepUnderlyingAsset();
+
+    // ============ Events ============
+
+    /// @notice Emitted when tokens are swept from the vault
+    /// @param token The token that was swept
+    /// @param to The recipient address
+    /// @param amount The amount of tokens swept
+    event Swept(address indexed token, address indexed to, uint256 amount);
 
     // ============ Constructor ============
 
@@ -154,5 +169,28 @@ contract GuardedVault is ERC4626, VaultAccessControl, EmergencyModule {
     /// @dev Allows users to exit but prevents new deposits
     function setWithdrawOnly() external onlyRole(GUARDIAN_ROLE) {
         _setWithdrawOnly();
+    }
+
+    // ============ Token Recovery ============
+
+    /// @notice Sweep accidentally-sent tokens to a recipient
+    /// @dev CRITICAL: Cannot sweep the vault's underlying asset!
+    /// @param token The ERC-20 token to sweep
+    /// @param to The recipient address for recovered tokens
+    function sweep(IERC20 token, address to) external onlyRole(OWNER_ROLE) {
+        // CRITICAL PROTECTION: Never allow sweeping the underlying asset
+        // This would drain user deposits!
+        if (address(token) == asset()) {
+            revert CannotSweepUnderlyingAsset();
+        }
+
+        // Get the full balance of the accidentally-sent token
+        uint256 amount = token.balanceOf(address(this));
+
+        // Transfer using SafeERC20 (handles non-standard tokens like USDT)
+        token.safeTransfer(to, amount);
+
+        // Emit event for transparency and off-chain tracking
+        emit Swept(address(token), to, amount);
     }
 }
