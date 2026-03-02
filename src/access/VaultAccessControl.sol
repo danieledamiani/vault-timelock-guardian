@@ -106,10 +106,7 @@ abstract contract VaultAccessControl is AccessControl {
     /// @notice Override to restrict role granting
     /// @dev Guardian and Operator CANNOT grant any roles, even if they somehow become admin
     /// @dev This is a defense-in-depth measure
-    function grantRole(
-        bytes32 role,
-        address account
-    ) public virtual override onlyRole(getRoleAdmin(role)) {
+    function grantRole(bytes32 role, address account) public virtual override onlyRole(getRoleAdmin(role)) {
         // Additional check: prevent guardians from granting roles even if they become admin
         if (!isOwner(msg.sender)) {
             revert ActionNotAllowed("Only owner can grant roles");
@@ -119,10 +116,7 @@ abstract contract VaultAccessControl is AccessControl {
 
     /// @notice Override to restrict role revoking
     /// @dev Same defense-in-depth as grantRole
-    function revokeRole(
-        bytes32 role,
-        address account
-    ) public virtual override onlyRole(getRoleAdmin(role)) {
+    function revokeRole(bytes32 role, address account) public virtual override onlyRole(getRoleAdmin(role)) {
         // Same check as grantRole - only OWNER can revoke
         if (!hasRole(OWNER_ROLE, msg.sender)) {
             revert ActionNotAllowed("Only owner can revoke roles");
