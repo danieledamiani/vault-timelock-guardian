@@ -26,12 +26,7 @@ contract EmergencyModuleTest is Test {
         token = new MockERC20("Test Token", "TEST", 18);
 
         // Deploy guarded vault
-        vault = new GuardedVault(
-            IERC20(address(token)),
-            "Guarded Vault Token",
-            "gvTEST",
-            owner
-        );
+        vault = new GuardedVault(IERC20(address(token)), "Guarded Vault Token", "gvTEST", owner);
 
         // Setup roles
         vm.prank(owner);
@@ -54,10 +49,7 @@ contract EmergencyModuleTest is Test {
         assertTrue(vault.isNormal());
         assertFalse(vault.isPaused());
         assertFalse(vault.isWithdrawOnly());
-        assertEq(
-            uint256(vault.emergencyState()),
-            uint256(EmergencyModule.EmergencyState.NORMAL)
-        );
+        assertEq(uint256(vault.emergencyState()), uint256(EmergencyModule.EmergencyState.NORMAL));
     }
 
     // ============ Pause Tests ============
@@ -109,9 +101,7 @@ contract EmergencyModuleTest is Test {
         vm.prank(guardian);
         vm.expectEmit(true, true, true, true);
         emit EmergencyModule.EmergencyStateChanged(
-            EmergencyModule.EmergencyState.NORMAL,
-            EmergencyModule.EmergencyState.PAUSED,
-            guardian
+            EmergencyModule.EmergencyState.NORMAL, EmergencyModule.EmergencyState.PAUSED, guardian
         );
         vault.pause();
     }
@@ -198,9 +188,7 @@ contract EmergencyModuleTest is Test {
         vm.prank(guardian);
         vm.expectEmit(true, true, true, true);
         emit EmergencyModule.EmergencyStateChanged(
-            EmergencyModule.EmergencyState.NORMAL,
-            EmergencyModule.EmergencyState.WITHDRAW_ONLY,
-            guardian
+            EmergencyModule.EmergencyState.NORMAL, EmergencyModule.EmergencyState.WITHDRAW_ONLY, guardian
         );
         vault.setWithdrawOnly();
     }
@@ -214,9 +202,7 @@ contract EmergencyModuleTest is Test {
         vm.prank(alice);
         vm.expectRevert(
             abi.encodeWithSelector(
-                EmergencyModule.OperationNotAllowed.selector,
-                EmergencyModule.EmergencyState.PAUSED,
-                "deposit/mint"
+                EmergencyModule.OperationNotAllowed.selector, EmergencyModule.EmergencyState.PAUSED, "deposit/mint"
             )
         );
         vault.deposit(1000e18, alice);
@@ -229,9 +215,7 @@ contract EmergencyModuleTest is Test {
         vm.prank(alice);
         vm.expectRevert(
             abi.encodeWithSelector(
-                EmergencyModule.OperationNotAllowed.selector,
-                EmergencyModule.EmergencyState.PAUSED,
-                "deposit/mint"
+                EmergencyModule.OperationNotAllowed.selector, EmergencyModule.EmergencyState.PAUSED, "deposit/mint"
             )
         );
         vault.mint(1000e18, alice);
@@ -250,9 +234,7 @@ contract EmergencyModuleTest is Test {
         vm.prank(alice);
         vm.expectRevert(
             abi.encodeWithSelector(
-                EmergencyModule.OperationNotAllowed.selector,
-                EmergencyModule.EmergencyState.PAUSED,
-                "withdraw/redeem"
+                EmergencyModule.OperationNotAllowed.selector, EmergencyModule.EmergencyState.PAUSED, "withdraw/redeem"
             )
         );
         vault.withdraw(500e18, alice, alice);
@@ -272,9 +254,7 @@ contract EmergencyModuleTest is Test {
         vm.prank(alice);
         vm.expectRevert(
             abi.encodeWithSelector(
-                EmergencyModule.OperationNotAllowed.selector,
-                EmergencyModule.EmergencyState.PAUSED,
-                "withdraw/redeem"
+                EmergencyModule.OperationNotAllowed.selector, EmergencyModule.EmergencyState.PAUSED, "withdraw/redeem"
             )
         );
         vault.redeem(shares, alice, alice);
@@ -479,9 +459,7 @@ contract EmergencyModuleTest is Test {
         vault.deposit(amount, alice);
     }
 
-    function testFuzz_WithdrawAllowedInWithdrawOnly(
-        uint256 depositAmount
-    ) public {
+    function testFuzz_WithdrawAllowedInWithdrawOnly(uint256 depositAmount) public {
         depositAmount = bound(depositAmount, 1e18, INITIAL_BALANCE);
 
         // Deposit first

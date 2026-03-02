@@ -11,12 +11,7 @@ contract TestableVaultAccessControl is VaultAccessControl {
     constructor(address owner_) VaultAccessControl(owner_) {}
 
     /// @notice Test function that only owner can call
-    function ownerOnlyAction()
-        external
-        view
-        onlyRole(OWNER_ROLE)
-        returns (bool)
-    {
+    function ownerOnlyAction() external view onlyRole(OWNER_ROLE) returns (bool) {
         return true;
     }
 
@@ -27,12 +22,7 @@ contract TestableVaultAccessControl is VaultAccessControl {
     }
 
     /// @notice Test function that operator can call
-    function operatorAction()
-        external
-        view
-        onlyRole(OPERATOR_ROLE)
-        returns (bool)
-    {
+    function operatorAction() external view onlyRole(OPERATOR_ROLE) returns (bool) {
         return true;
     }
 }
@@ -68,10 +58,7 @@ contract VaultAccessControlTest is Test {
 
     function test_Constructor_RevertsOnZeroAddress() public {
         vm.expectRevert(
-            abi.encodeWithSelector(
-                VaultAccessControl.ActionNotAllowed.selector,
-                "Owner cannot be zero address"
-            )
+            abi.encodeWithSelector(VaultAccessControl.ActionNotAllowed.selector, "Owner cannot be zero address")
         );
         new TestableVaultAccessControl(address(0));
     }
@@ -218,10 +205,7 @@ contract VaultAccessControlTest is Test {
     function test_CannotGrantRoleToZeroAddress() public {
         vm.prank(owner);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                VaultAccessControl.ActionNotAllowed.selector,
-                "Guardian cannot be zero address"
-            )
+            abi.encodeWithSelector(VaultAccessControl.ActionNotAllowed.selector, "Guardian cannot be zero address")
         );
         accessControl.grantGuardian(address(0));
     }
@@ -229,10 +213,7 @@ contract VaultAccessControlTest is Test {
     function test_CannotGrantOperatorToZeroAddress() public {
         vm.prank(owner);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                VaultAccessControl.ActionNotAllowed.selector,
-                "Operator cannot be zero address"
-            )
+            abi.encodeWithSelector(VaultAccessControl.ActionNotAllowed.selector, "Operator cannot be zero address")
         );
         accessControl.grantOperator(address(0));
     }
@@ -271,10 +252,7 @@ contract VaultAccessControlTest is Test {
 
     // ============ Fuzz Tests ============
 
-    function testFuzz_OnlyOwnerCanGrantGuardian(
-        address caller,
-        address newGuardian
-    ) public {
+    function testFuzz_OnlyOwnerCanGrantGuardian(address caller, address newGuardian) public {
         vm.assume(caller != owner);
         vm.assume(newGuardian != address(0));
 
@@ -283,10 +261,7 @@ contract VaultAccessControlTest is Test {
         accessControl.grantGuardian(newGuardian);
     }
 
-    function testFuzz_OnlyOwnerCanGrantOperator(
-        address caller,
-        address newOperator
-    ) public {
+    function testFuzz_OnlyOwnerCanGrantOperator(address caller, address newOperator) public {
         vm.assume(caller != owner);
         vm.assume(newOperator != address(0));
 

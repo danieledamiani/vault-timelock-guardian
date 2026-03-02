@@ -141,11 +141,7 @@ contract BaseVaultRoundingTest is Test {
         // PROOF OF VULNERABILITY: victim STILL gets 0 shares even with OZ's protection!
         // The +1 virtual share isn't enough against a 10000e18 donation
         assertEq(actualShares, 0, "Victim still gets 0 shares");
-        assertEq(
-            victimSharesPreview,
-            0,
-            "Preview correctly predicted 0 shares"
-        );
+        assertEq(victimSharesPreview, 0, "Preview correctly predicted 0 shares");
 
         // Step 4: Verify attacker steals significant value
         uint256 attackerCanRedeem = vault.previewRedeem(1); // Attacker has 1 share
@@ -156,11 +152,7 @@ contract BaseVaultRoundingTest is Test {
         // = 1 * (15000e18 + 2) / (1 + 1) = ~7500e18
         // So attacker gets ~50% and the other ~50% is "stuck" belonging to the virtual share
         uint256 expectedAttackerAmount = (15_000e18 + 2) / 2;
-        assertEq(
-            attackerCanRedeem,
-            expectedAttackerAmount,
-            "Attacker gets ~50% of all assets"
-        );
+        assertEq(attackerCanRedeem, expectedAttackerAmount, "Attacker gets ~50% of all assets");
 
         // KEY INSIGHT: Victim lost 100% of their 5000e18 deposit!
         // ~2500e18 went to attacker's profit, ~2500e18 is stuck in the virtual share
@@ -189,11 +181,7 @@ contract BaseVaultRoundingTest is Test {
 
         // Depositing 500e18 should give: 500e18 * 1e18 / 1000e18 = 0.5e18 shares
         uint256 sharesFor500 = vault.previewDeposit(500e18);
-        assertEq(
-            sharesFor500,
-            0.5e18,
-            "500e18 assets should give 0.5e18 shares"
-        );
+        assertEq(sharesFor500, 0.5e18, "500e18 assets should give 0.5e18 shares");
 
         // Depositing 1000e18 gives exactly 1e18 shares
         uint256 sharesFor1000 = vault.previewDeposit(1000e18);
@@ -245,23 +233,12 @@ contract BaseVaultRoundingTest is Test {
         uint256 bobBalanceAfter = asset.balanceOf(bob);
 
         // Bob should never profit from instant round-trip
-        assertLe(
-            bobBalanceAfter,
-            bobBalanceBefore,
-            "User should not profit from instant deposit/redeem"
-        );
-        assertLe(
-            assetsBack,
-            depositAmount,
-            "Assets received should not exceed assets deposited"
-        );
+        assertLe(bobBalanceAfter, bobBalanceBefore, "User should not profit from instant deposit/redeem");
+        assertLe(assetsBack, depositAmount, "Assets received should not exceed assets deposited");
     }
 
     /// @notice Fuzz: preview functions should never lie in user's favor
-    function testFuzz_PreviewNeverLiesInUserFavor(
-        uint256 depositAmount,
-        uint256 yieldAmount
-    ) public {
+    function testFuzz_PreviewNeverLiesInUserFavor(uint256 depositAmount, uint256 yieldAmount) public {
         depositAmount = bound(depositAmount, 100, 50_000e18);
         yieldAmount = bound(yieldAmount, 0, 10_000e18);
 
@@ -278,20 +255,12 @@ contract BaseVaultRoundingTest is Test {
         uint256 previewShares = vault.previewDeposit(depositAmount);
         vm.prank(bob);
         uint256 actualShares = vault.deposit(depositAmount, bob);
-        assertLe(
-            actualShares,
-            previewShares,
-            "Actual shares <= preview shares"
-        );
+        assertLe(actualShares, previewShares, "Actual shares <= preview shares");
 
         // Test redeem preview
         uint256 previewAssets = vault.previewRedeem(actualShares);
         vm.prank(bob);
         uint256 actualAssets = vault.redeem(actualShares, bob, bob);
-        assertLe(
-            actualAssets,
-            previewAssets,
-            "Actual assets <= preview assets"
-        );
+        assertLe(actualAssets, previewAssets, "Actual assets <= preview assets");
     }
 }

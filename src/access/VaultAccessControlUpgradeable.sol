@@ -25,26 +25,24 @@ abstract contract VaultAccessControlUpgradeable is AccessControlUpgradeable {
     // ============ Initializer ============
 
     /// @dev Replaces the constructor. Grants OWNER_ROLE to the initial owner.
-    function __VaultAccessControl_init(
-        address owner_
-    ) internal onlyInitializing {
+    function __VaultAccessControl_init(address owner_) internal onlyInitializing {
         __AccessControl_init();
         __VaultAccessControl_init_unchained(owner_);
     }
 
-    function __VaultAccessControl_init_unchained(
-        address owner_
-    ) internal onlyInitializing {
-        if (owner_ == address(0))
+    function __VaultAccessControl_init_unchained(address owner_) internal onlyInitializing {
+        if (owner_ == address(0)) {
             revert ActionNotAllowed("Owner cannot be zero address");
+        }
         _grantRole(OWNER_ROLE, owner_);
     }
 
     // ============ Role Management ============
 
     function grantGuardian(address guardian) external onlyRole(OWNER_ROLE) {
-        if (guardian == address(0))
+        if (guardian == address(0)) {
             revert ActionNotAllowed("Guardian cannot be zero address");
+        }
         _grantRole(GUARDIAN_ROLE, guardian);
     }
 
@@ -53,8 +51,9 @@ abstract contract VaultAccessControlUpgradeable is AccessControlUpgradeable {
     }
 
     function grantOperator(address operator) external onlyRole(OWNER_ROLE) {
-        if (operator == address(0))
+        if (operator == address(0)) {
             revert ActionNotAllowed("Operator cannot be zero address");
+        }
         _grantRole(OPERATOR_ROLE, operator);
     }
 
@@ -78,20 +77,14 @@ abstract contract VaultAccessControlUpgradeable is AccessControlUpgradeable {
 
     // ============ Security Overrides ============
 
-    function grantRole(
-        bytes32 role,
-        address account
-    ) public virtual override onlyRole(getRoleAdmin(role)) {
+    function grantRole(bytes32 role, address account) public virtual override onlyRole(getRoleAdmin(role)) {
         if (!isOwner(msg.sender)) {
             revert ActionNotAllowed("Only owner can grant roles");
         }
         _grantRole(role, account);
     }
 
-    function revokeRole(
-        bytes32 role,
-        address account
-    ) public virtual override onlyRole(getRoleAdmin(role)) {
+    function revokeRole(bytes32 role, address account) public virtual override onlyRole(getRoleAdmin(role)) {
         if (!hasRole(OWNER_ROLE, msg.sender)) {
             revert ActionNotAllowed("Only owner can revoke roles");
         }

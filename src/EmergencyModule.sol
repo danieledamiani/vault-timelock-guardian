@@ -24,6 +24,7 @@ abstract contract EmergencyModule {
         NORMAL, // 0 - All operations allowed
         PAUSED, // 1 - No operations allowed
         WITHDRAW_ONLY // 2 - Only withdrawals allowed
+
     }
 
     // ============ State ============
@@ -38,9 +39,7 @@ abstract contract EmergencyModule {
     /// @param newState The state after the change
     /// @param triggeredBy Address that triggered the change
     event EmergencyStateChanged(
-        EmergencyState indexed previousState,
-        EmergencyState indexed newState,
-        address indexed triggeredBy
+        EmergencyState indexed previousState, EmergencyState indexed newState, address indexed triggeredBy
     );
 
     // ============ Errors ============
@@ -49,11 +48,7 @@ abstract contract EmergencyModule {
     error OperationNotAllowed(EmergencyState currentState, string operation);
 
     /// @notice Thrown when state transition is not allowed
-    error InvalidStateTransition(
-        EmergencyState from,
-        EmergencyState to,
-        string reason
-    );
+    error InvalidStateTransition(EmergencyState from, EmergencyState to, string reason);
 
     // ============ Constructor ============
 
@@ -120,11 +115,7 @@ abstract contract EmergencyModule {
 
         // Can pause from NORMAL or WITHDRAW_ONLY
         if (previous == EmergencyState.PAUSED) {
-            revert InvalidStateTransition(
-                previous,
-                EmergencyState.PAUSED,
-                "Already paused"
-            );
+            revert InvalidStateTransition(previous, EmergencyState.PAUSED, "Already paused");
         }
 
         _emergencyState = EmergencyState.PAUSED;
@@ -137,11 +128,7 @@ abstract contract EmergencyModule {
         EmergencyState previous = _emergencyState;
 
         if (previous == EmergencyState.NORMAL) {
-            revert InvalidStateTransition(
-                previous,
-                EmergencyState.NORMAL,
-                "Already normal"
-            );
+            revert InvalidStateTransition(previous, EmergencyState.NORMAL, "Already normal");
         }
 
         _emergencyState = EmergencyState.NORMAL;
@@ -158,17 +145,11 @@ abstract contract EmergencyModule {
         // If paused, must unpause first (owner decision)
         if (previous != EmergencyState.NORMAL) {
             revert InvalidStateTransition(
-                previous,
-                EmergencyState.WITHDRAW_ONLY,
-                "Can only set withdraw-only from normal"
+                previous, EmergencyState.WITHDRAW_ONLY, "Can only set withdraw-only from normal"
             );
         }
 
         _emergencyState = EmergencyState.WITHDRAW_ONLY;
-        emit EmergencyStateChanged(
-            previous,
-            EmergencyState.WITHDRAW_ONLY,
-            msg.sender
-        );
+        emit EmergencyStateChanged(previous, EmergencyState.WITHDRAW_ONLY, msg.sender);
     }
 }

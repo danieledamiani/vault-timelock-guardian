@@ -179,10 +179,7 @@ contract BaseVaultTest is Test {
         assertEq(vault.balanceOf(bob), vault.balanceOf(alice) * 2);
 
         // Total should equal sum
-        assertEq(
-            vault.totalSupply(),
-            vault.balanceOf(alice) + vault.balanceOf(bob)
-        );
+        assertEq(vault.totalSupply(), vault.balanceOf(alice) + vault.balanceOf(bob));
         assertEq(vault.totalAssets(), 3000e18);
     }
 
@@ -208,9 +205,7 @@ contract BaseVaultTest is Test {
 
     // ============ Fuzz Tests ============
 
-    function testFuzz_Deposit_NeverMintsMoreThanExpected(
-        uint256 amount
-    ) public {
+    function testFuzz_Deposit_NeverMintsMoreThanExpected(uint256 amount) public {
         amount = bound(amount, 1, INITIAL_BALANCE);
 
         uint256 preview = vault.previewDeposit(amount);
@@ -222,9 +217,7 @@ contract BaseVaultTest is Test {
         assertLe(actual, preview);
     }
 
-    function testFuzz_Redeem_NeverReturnsMoreThanExpected(
-        uint256 depositAmount
-    ) public {
+    function testFuzz_Redeem_NeverReturnsMoreThanExpected(uint256 depositAmount) public {
         depositAmount = bound(depositAmount, 1, INITIAL_BALANCE);
 
         // Setup: deposit first

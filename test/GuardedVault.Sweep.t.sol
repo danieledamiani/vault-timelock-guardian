@@ -35,12 +35,7 @@ contract GuardedVaultSweepTest is Test {
         dustToken = new MockERC20("Random Airdrop", "AIRDROP", 18);
 
         // Deploy the guarded vault
-        vault = new GuardedVault(
-            IERC20(address(underlyingToken)),
-            "Guarded Vault USDC",
-            "gvUSDC",
-            owner
-        );
+        vault = new GuardedVault(IERC20(address(underlyingToken)), "Guarded Vault USDC", "gvUSDC", owner);
 
         // Setup: owner grants guardian and operator roles
         vm.startPrank(owner);
@@ -183,10 +178,7 @@ contract GuardedVaultSweepTest is Test {
 
     /// @notice Fuzz test: sweep works for any non-underlying token
     /// @dev Ensures sweep protection holds for random token addresses
-    function testFuzz_Sweep_WorksForAnyNonUnderlyingToken(
-        uint256 amount,
-        address sweepRecipient
-    ) public {
+    function testFuzz_Sweep_WorksForAnyNonUnderlyingToken(uint256 amount, address sweepRecipient) public {
         // Bound inputs to valid ranges
         amount = bound(amount, 0, type(uint128).max);
         vm.assume(sweepRecipient != address(0));
@@ -205,20 +197,13 @@ contract GuardedVaultSweepTest is Test {
     }
 
     /// @notice Fuzz test: underlying asset protection holds for any amount
-    function testFuzz_Sweep_AlwaysProtectsUnderlying(
-        uint256 depositAmount
-    ) public {
+    function testFuzz_Sweep_AlwaysProtectsUnderlying(uint256 depositAmount) public {
         // Bound to reasonable deposit range
         depositAmount = bound(depositAmount, 1e18, 1_000_000e18);
 
         // Create fresh vault and user for clean state
         MockERC20 freshToken = new MockERC20("Fresh USDC", "fUSDC", 18);
-        GuardedVault freshVault = new GuardedVault(
-            IERC20(address(freshToken)),
-            "Fresh Vault",
-            "fvUSDC",
-            owner
-        );
+        GuardedVault freshVault = new GuardedVault(IERC20(address(freshToken)), "Fresh Vault", "fvUSDC", owner);
 
         // User deposits
         address freshUser = makeAddr("freshUser");

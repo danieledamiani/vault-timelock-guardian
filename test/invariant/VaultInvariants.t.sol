@@ -30,13 +30,8 @@ contract VaultInvariants is Test {
         underlying = new MockERC20("USD Coin", "USDC", 18);
 
         VaultTimelockProxyDeployer deployer = new VaultTimelockProxyDeployer();
-        (vault, ) = deployer.deploy(
-            IERC20(address(underlying)),
-            "Guarded Vault",
-            "gvUSDC",
-            makeAddr("admin"),
-            makeAddr("guardian"),
-            1 days
+        (vault,) = deployer.deploy(
+            IERC20(address(underlying)), "Guarded Vault", "gvUSDC", makeAddr("admin"), makeAddr("guardian"), 1 days
         );
 
         handler = new VaultHandler(vault, underlying);
@@ -52,18 +47,9 @@ contract VaultInvariants is Test {
     // It would fail if any code path minted or burned shares incorrectly.
 
     /// @notice totalSupply() == sum of all actor share balances
-    function invariant_shareAccounting_totalSupplyMatchesActors()
-        external
-        view
-    {
-        address[3] memory actors = [
-            address(0x1001),
-            address(0x1002),
-            address(0x1003)
-        ];
-        uint256 actorShareSum = vault.balanceOf(actors[0]) +
-            vault.balanceOf(actors[1]) +
-            vault.balanceOf(actors[2]);
+    function invariant_shareAccounting_totalSupplyMatchesActors() external view {
+        address[3] memory actors = [address(0x1001), address(0x1002), address(0x1003)];
+        uint256 actorShareSum = vault.balanceOf(actors[0]) + vault.balanceOf(actors[1]) + vault.balanceOf(actors[2]);
 
         assertEq(vault.totalSupply(), actorShareSum);
     }

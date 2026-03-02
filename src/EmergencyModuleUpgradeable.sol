@@ -23,20 +23,14 @@ abstract contract EmergencyModuleUpgradeable is Initializable {
     // ============ Events ============
 
     event EmergencyStateChanged(
-        EmergencyState indexed previousState,
-        EmergencyState indexed newState,
-        address indexed triggeredBy
+        EmergencyState indexed previousState, EmergencyState indexed newState, address indexed triggeredBy
     );
 
     // ============ Errors ============
 
     error OperationNotAllowed(EmergencyState currentState, string operation);
 
-    error InvalidStateTransition(
-        EmergencyState from,
-        EmergencyState to,
-        string reason
-    );
+    error InvalidStateTransition(EmergencyState from, EmergencyState to, string reason);
 
     // ============ Initializer ============
 
@@ -95,11 +89,7 @@ abstract contract EmergencyModuleUpgradeable is Initializable {
     function _pause() internal {
         EmergencyState previous = _emergencyState;
         if (previous == EmergencyState.PAUSED) {
-            revert InvalidStateTransition(
-                previous,
-                EmergencyState.PAUSED,
-                "Already paused"
-            );
+            revert InvalidStateTransition(previous, EmergencyState.PAUSED, "Already paused");
         }
         _emergencyState = EmergencyState.PAUSED;
         emit EmergencyStateChanged(previous, EmergencyState.PAUSED, msg.sender);
@@ -108,11 +98,7 @@ abstract contract EmergencyModuleUpgradeable is Initializable {
     function _unpause() internal {
         EmergencyState previous = _emergencyState;
         if (previous == EmergencyState.NORMAL) {
-            revert InvalidStateTransition(
-                previous,
-                EmergencyState.NORMAL,
-                "Already normal"
-            );
+            revert InvalidStateTransition(previous, EmergencyState.NORMAL, "Already normal");
         }
         _emergencyState = EmergencyState.NORMAL;
         emit EmergencyStateChanged(previous, EmergencyState.NORMAL, msg.sender);
@@ -122,17 +108,11 @@ abstract contract EmergencyModuleUpgradeable is Initializable {
         EmergencyState previous = _emergencyState;
         if (previous != EmergencyState.NORMAL) {
             revert InvalidStateTransition(
-                previous,
-                EmergencyState.WITHDRAW_ONLY,
-                "Can only set withdraw-only from normal"
+                previous, EmergencyState.WITHDRAW_ONLY, "Can only set withdraw-only from normal"
             );
         }
         _emergencyState = EmergencyState.WITHDRAW_ONLY;
-        emit EmergencyStateChanged(
-            previous,
-            EmergencyState.WITHDRAW_ONLY,
-            msg.sender
-        );
+        emit EmergencyStateChanged(previous, EmergencyState.WITHDRAW_ONLY, msg.sender);
     }
 
     // ============ Storage Gap ============

@@ -15,11 +15,7 @@ contract BaseVault is ERC4626 {
     /// @param asset_ The underlying ERC-20 token (e.g., USDC)
     /// @param name_ The vault share token name (e.g., "Vault USDC")
     /// @param symbol_ The vault share token symbol (e.g., "vUSDC")
-    constructor(
-        IERC20 asset_,
-        string memory name_,
-        string memory symbol_
-    ) ERC4626(asset_) ERC20(name_, symbol_) {}
+    constructor(IERC20 asset_, string memory name_, string memory symbol_) ERC4626(asset_) ERC20(name_, symbol_) {}
 
     /// @notice Returns total assets managed by the vault
     /// @dev This is the SOURCE OF TRUTH for share calculations

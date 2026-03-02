@@ -46,12 +46,7 @@ contract GuardedVault is ERC4626, VaultAccessControl, EmergencyModule {
     /// @param name_ The vault share token name (e.g., "Guarded Vault USDC")
     /// @param symbol_ The vault share token symbol (e.g., "gvUSDC")
     /// @param owner_ The initial owner address
-    constructor(
-        IERC20 asset_,
-        string memory name_,
-        string memory symbol_,
-        address owner_
-    )
+    constructor(IERC20 asset_, string memory name_, string memory symbol_, address owner_)
         ERC4626(asset_)
         ERC20(name_, symbol_)
         VaultAccessControl(owner_)
@@ -62,39 +57,49 @@ contract GuardedVault is ERC4626, VaultAccessControl, EmergencyModule {
 
     /// @notice Deposit assets and receive shares
     /// @dev Blocked when paused or in withdraw-only mode
-    function deposit(
-        uint256 assets,
-        address receiver
-    ) public virtual override whenNotPausedOrWithdrawOnly returns (uint256) {
+    function deposit(uint256 assets, address receiver)
+        public
+        virtual
+        override
+        whenNotPausedOrWithdrawOnly
+        returns (uint256)
+    {
         return super.deposit(assets, receiver);
     }
 
     /// @notice Mint exact shares by depositing assets
     /// @dev Blocked when paused or in withdraw-only mode
-    function mint(
-        uint256 shares,
-        address receiver
-    ) public virtual override whenNotPausedOrWithdrawOnly returns (uint256) {
+    function mint(uint256 shares, address receiver)
+        public
+        virtual
+        override
+        whenNotPausedOrWithdrawOnly
+        returns (uint256)
+    {
         return super.mint(shares, receiver);
     }
 
     /// @notice Withdraw assets by burning shares
     /// @dev Allowed in NORMAL and WITHDRAW_ONLY, blocked when PAUSED
-    function withdraw(
-        uint256 assets,
-        address receiver,
-        address owner_
-    ) public virtual override whenWithdrawalsAllowed returns (uint256) {
+    function withdraw(uint256 assets, address receiver, address owner_)
+        public
+        virtual
+        override
+        whenWithdrawalsAllowed
+        returns (uint256)
+    {
         return super.withdraw(assets, receiver, owner_);
     }
 
     /// @notice Redeem shares for assets
     /// @dev Allowed in NORMAL and WITHDRAW_ONLY, blocked when PAUSED
-    function redeem(
-        uint256 shares,
-        address receiver,
-        address owner_
-    ) public virtual override whenWithdrawalsAllowed returns (uint256) {
+    function redeem(uint256 shares, address receiver, address owner_)
+        public
+        virtual
+        override
+        whenWithdrawalsAllowed
+        returns (uint256)
+    {
         return super.redeem(shares, receiver, owner_);
     }
 
@@ -108,9 +113,7 @@ contract GuardedVault is ERC4626, VaultAccessControl, EmergencyModule {
 
     /// @notice Maximum depositable assets
     /// @dev Returns 0 when deposits are blocked
-    function maxDeposit(
-        address receiver
-    ) public view virtual override returns (uint256) {
+    function maxDeposit(address receiver) public view virtual override returns (uint256) {
         if (emergencyState() != EmergencyState.NORMAL) {
             return 0;
         }
@@ -119,9 +122,7 @@ contract GuardedVault is ERC4626, VaultAccessControl, EmergencyModule {
 
     /// @notice Maximum mintable shares
     /// @dev Returns 0 when minting is blocked
-    function maxMint(
-        address receiver
-    ) public view virtual override returns (uint256) {
+    function maxMint(address receiver) public view virtual override returns (uint256) {
         if (emergencyState() != EmergencyState.NORMAL) {
             return 0;
         }
@@ -130,9 +131,7 @@ contract GuardedVault is ERC4626, VaultAccessControl, EmergencyModule {
 
     /// @notice Maximum withdrawable assets
     /// @dev Returns 0 when paused, normal max otherwise
-    function maxWithdraw(
-        address owner_
-    ) public view virtual override returns (uint256) {
+    function maxWithdraw(address owner_) public view virtual override returns (uint256) {
         if (emergencyState() == EmergencyState.PAUSED) {
             return 0;
         }
@@ -141,9 +140,7 @@ contract GuardedVault is ERC4626, VaultAccessControl, EmergencyModule {
 
     /// @notice Maximum redeemable shares
     /// @dev Returns 0 when paused, normal max otherwise
-    function maxRedeem(
-        address owner_
-    ) public view virtual override returns (uint256) {
+    function maxRedeem(address owner_) public view virtual override returns (uint256) {
         if (emergencyState() == EmergencyState.PAUSED) {
             return 0;
         }

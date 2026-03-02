@@ -44,14 +44,8 @@ contract UpgradeIntegrationTest is Test {
 
         // Deploy vault (behind ERC1967 proxy) + timelock atomically
         VaultTimelockProxyDeployer deployer = new VaultTimelockProxyDeployer();
-        (vault, timelock) = deployer.deploy(
-            IERC20(address(underlying)),
-            "Guarded Vault USDC",
-            "gvUSDC",
-            admin,
-            guardian,
-            MIN_DELAY
-        );
+        (vault, timelock) =
+            deployer.deploy(IERC20(address(underlying)), "Guarded Vault USDC", "gvUSDC", admin, guardian, MIN_DELAY);
 
         // User deposits into the proxy vault
         underlying.mint(user, DEPOSIT_AMOUNT);
@@ -72,14 +66,7 @@ contract UpgradeIntegrationTest is Test {
     /// @dev Schedules, waits, and executes a timelocked call on the vault
     function _timelockExecute(bytes memory data) internal {
         vm.prank(admin);
-        timelock.schedule(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0),
-            MIN_DELAY
-        );
+        timelock.schedule(address(vault), 0, data, bytes32(0), bytes32(0), MIN_DELAY);
         vm.warp(block.timestamp + MIN_DELAY);
         timelock.execute(address(vault), 0, data, bytes32(0), bytes32(0));
     }
@@ -94,10 +81,7 @@ contract UpgradeIntegrationTest is Test {
         address v2Address = _deployV2();
 
         // 3. Build upgradeToAndCall calldata
-        bytes memory encodedData = abi.encodeCall(
-            vault.upgradeToAndCall,
-            (v2Address, "")
-        );
+        bytes memory encodedData = abi.encodeCall(vault.upgradeToAndCall, (v2Address, ""));
 
         // 4. Execute through timelock with _timelockExecute(data)
         _timelockExecute(encodedData);
@@ -124,33 +108,21 @@ contract UpgradeIntegrationTest is Test {
         // 2. As attacker: vm.prank(attacker) + vm.expectRevert() + vault.upgradeToAndCall(...)
         vm.prank(attacker);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector,
-                attacker,
-                bytes32(0)
-            )
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, attacker, bytes32(0))
         );
         vault.upgradeToAndCall(v2Address, "");
 
         //  3. As admin (not owner, just proposer): same pattern — should also revert
         vm.prank(admin);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector,
-                admin,
-                bytes32(0)
-            )
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, admin, bytes32(0))
         );
         vault.upgradeToAndCall(v2Address, "");
 
         // 4. As guardian: same pattern — should also revert
         vm.prank(guardian);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector,
-                guardian,
-                bytes32(0)
-            )
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, guardian, bytes32(0))
         );
 
         vault.upgradeToAndCall(v2Address, "");

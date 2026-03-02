@@ -48,10 +48,7 @@ contract VaultTimelockProxyDeployer {
         GuardedVaultV1 implementation = new GuardedVaultV1();
 
         // Step 2: encode initialize() calldata
-        bytes memory _data = abi.encodeCall(
-            implementation.initialize,
-            (asset_, name_, symbol_, address(this))
-        );
+        bytes memory _data = abi.encodeCall(implementation.initialize, (asset_, name_, symbol_, address(this)));
 
         // Step 3: deploy ERC1967Proxy and cast it to GuardedVaultV1
         ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), _data);

@@ -12,11 +12,7 @@ contract MockERC20 is ERC20 {
     /// @param name_ Token name (e.g., "Mock USDC")
     /// @param symbol_ Token symbol (e.g., "mUSDC")
     /// @param decimals_ Number of decimals (6 for USDC-like, 18 for ETH-like)
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        uint8 decimals_
-    ) ERC20(name_, symbol_) {
+    constructor(string memory name_, string memory symbol_, uint8 decimals_) ERC20(name_, symbol_) {
         _decimals = decimals_;
     }
 

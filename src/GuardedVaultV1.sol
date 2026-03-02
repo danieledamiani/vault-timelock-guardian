@@ -48,12 +48,10 @@ contract GuardedVaultV1 is
     /// @param name_ The vault share token name
     /// @param symbol_ The vault share token symbol
     /// @param owner_ The initial owner address
-    function initialize(
-        IERC20 asset_,
-        string memory name_,
-        string memory symbol_,
-        address owner_
-    ) external initializer {
+    function initialize(IERC20 asset_, string memory name_, string memory symbol_, address owner_)
+        external
+        initializer
+    {
         __ERC4626_init(asset_);
         __ERC20_init(name_, symbol_);
         __VaultAccessControl_init(owner_);
@@ -63,39 +61,47 @@ contract GuardedVaultV1 is
     // ============ UUPS Authorization ============
 
     /// @notice UUPS authorization — only OWNER_ROLE (timelock) can upgrade
-    function _authorizeUpgrade(
-        address newImplementation
-    ) internal override onlyRole(OWNER_ROLE) {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(OWNER_ROLE) {}
 
     // ============ ERC-4626 Overrides with Emergency Checks ============
 
-    function deposit(
-        uint256 assets,
-        address receiver
-    ) public virtual override whenNotPausedOrWithdrawOnly returns (uint256) {
+    function deposit(uint256 assets, address receiver)
+        public
+        virtual
+        override
+        whenNotPausedOrWithdrawOnly
+        returns (uint256)
+    {
         return super.deposit(assets, receiver);
     }
 
-    function mint(
-        uint256 shares,
-        address receiver
-    ) public virtual override whenNotPausedOrWithdrawOnly returns (uint256) {
+    function mint(uint256 shares, address receiver)
+        public
+        virtual
+        override
+        whenNotPausedOrWithdrawOnly
+        returns (uint256)
+    {
         return super.mint(shares, receiver);
     }
 
-    function withdraw(
-        uint256 assets,
-        address receiver,
-        address owner_
-    ) public virtual override whenWithdrawalsAllowed returns (uint256) {
+    function withdraw(uint256 assets, address receiver, address owner_)
+        public
+        virtual
+        override
+        whenWithdrawalsAllowed
+        returns (uint256)
+    {
         return super.withdraw(assets, receiver, owner_);
     }
 
-    function redeem(
-        uint256 shares,
-        address receiver,
-        address owner_
-    ) public virtual override whenWithdrawalsAllowed returns (uint256) {
+    function redeem(uint256 shares, address receiver, address owner_)
+        public
+        virtual
+        override
+        whenWithdrawalsAllowed
+        returns (uint256)
+    {
         return super.redeem(shares, receiver, owner_);
     }
 
@@ -105,36 +111,28 @@ contract GuardedVaultV1 is
         return IERC20(asset()).balanceOf(address(this));
     }
 
-    function maxDeposit(
-        address receiver
-    ) public view virtual override returns (uint256) {
+    function maxDeposit(address receiver) public view virtual override returns (uint256) {
         if (emergencyState() != EmergencyState.NORMAL) {
             return 0;
         }
         return super.maxDeposit(receiver);
     }
 
-    function maxMint(
-        address receiver
-    ) public view virtual override returns (uint256) {
+    function maxMint(address receiver) public view virtual override returns (uint256) {
         if (emergencyState() != EmergencyState.NORMAL) {
             return 0;
         }
         return super.maxMint(receiver);
     }
 
-    function maxWithdraw(
-        address owner_
-    ) public view virtual override returns (uint256) {
+    function maxWithdraw(address owner_) public view virtual override returns (uint256) {
         if (emergencyState() == EmergencyState.PAUSED) {
             return 0;
         }
         return super.maxWithdraw(owner_);
     }
 
-    function maxRedeem(
-        address owner_
-    ) public view virtual override returns (uint256) {
+    function maxRedeem(address owner_) public view virtual override returns (uint256) {
         if (emergencyState() == EmergencyState.PAUSED) {
             return 0;
         }

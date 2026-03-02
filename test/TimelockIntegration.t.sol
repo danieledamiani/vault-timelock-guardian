@@ -44,14 +44,8 @@ contract TimelockIntegrationTest is Test {
 
         // Deploy vault + timelock atomically via deployer
         VaultTimelockDeployer deployer = new VaultTimelockDeployer();
-        (vault, timelock) = deployer.deploy(
-            IERC20(address(underlying)),
-            "Guarded Vault USDC",
-            "gvUSDC",
-            admin,
-            guardian,
-            MIN_DELAY
-        );
+        (vault, timelock) =
+            deployer.deploy(IERC20(address(underlying)), "Guarded Vault USDC", "gvUSDC", admin, guardian, MIN_DELAY);
 
         // Cache timelock role constants
         PROPOSER_ROLE = timelock.PROPOSER_ROLE();
@@ -114,21 +108,11 @@ contract TimelockIntegrationTest is Test {
     /// @notice Core test: schedule-wait-execute sweep through timelock
     function test_Timelock_SweepThroughTimelock() public {
         // 1. ENCODE: Build calldata for vault.sweep(dustToken, recipient)
-        bytes memory data = abi.encodeCall(
-            vault.sweep,
-            (IERC20(address(dustToken)), recipient)
-        );
+        bytes memory data = abi.encodeCall(vault.sweep, (IERC20(address(dustToken)), recipient));
 
         // 2. SCHEDULE: As admin (PROPOSER), schedule it on the timelock
         vm.prank(admin);
-        timelock.schedule(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0),
-            MIN_DELAY
-        );
+        timelock.schedule(address(vault), 0, data, bytes32(0), bytes32(0), MIN_DELAY);
 
         // 3. WAIT: Fast-forward past MIN_DELAY
         vm.warp(block.timestamp + MIN_DELAY);
@@ -149,14 +133,7 @@ contract TimelockIntegrationTest is Test {
         bytes memory data = abi.encodeCall(vault.grantGuardian, (newGuardian));
 
         vm.prank(admin);
-        timelock.schedule(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0),
-            MIN_DELAY
-        );
+        timelock.schedule(address(vault), 0, data, bytes32(0), bytes32(0), MIN_DELAY);
 
         vm.warp(block.timestamp + MIN_DELAY);
 
@@ -176,14 +153,7 @@ contract TimelockIntegrationTest is Test {
         bytes memory data = abi.encodeCall(vault.unpause, ());
 
         vm.prank(admin);
-        timelock.schedule(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0),
-            MIN_DELAY
-        );
+        timelock.schedule(address(vault), 0, data, bytes32(0), bytes32(0), MIN_DELAY);
 
         vm.warp(block.timestamp + MIN_DELAY);
 
@@ -220,14 +190,7 @@ contract TimelockIntegrationTest is Test {
         // 2. Admin schedules unpause (must go through timelock delay)
         bytes memory data = abi.encodeCall(vault.unpause, ());
         vm.prank(admin);
-        timelock.schedule(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0),
-            MIN_DELAY
-        );
+        timelock.schedule(address(vault), 0, data, bytes32(0), bytes32(0), MIN_DELAY);
 
         // 3. Vault stays paused during delay — users can see the pending unpause
         vm.warp(block.timestamp + MIN_DELAY / 2);
@@ -251,40 +214,20 @@ contract TimelockIntegrationTest is Test {
 
     /// @notice Attacker cannot schedule operations on the timelock
     function test_Access_AttackerCannotSchedule() public {
-        bytes memory data = abi.encodeCall(
-            vault.sweep,
-            (IERC20(address(dustToken)), attacker)
-        );
+        bytes memory data = abi.encodeCall(vault.sweep, (IERC20(address(dustToken)), attacker));
 
         vm.prank(attacker);
         vm.expectRevert();
-        timelock.schedule(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0),
-            MIN_DELAY
-        );
+        timelock.schedule(address(vault), 0, data, bytes32(0), bytes32(0), MIN_DELAY);
     }
 
     /// @notice Guardian cannot propose timelocked operations
     function test_Access_GuardianCannotPropose() public {
-        bytes memory data = abi.encodeCall(
-            vault.sweep,
-            (IERC20(address(dustToken)), guardian)
-        );
+        bytes memory data = abi.encodeCall(vault.sweep, (IERC20(address(dustToken)), guardian));
 
         vm.prank(guardian);
         vm.expectRevert();
-        timelock.schedule(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0),
-            MIN_DELAY
-        );
+        timelock.schedule(address(vault), 0, data, bytes32(0), bytes32(0), MIN_DELAY);
     }
 
     /// @notice Random user cannot call owner functions directly
@@ -298,20 +241,10 @@ contract TimelockIntegrationTest is Test {
 
     /// @notice Cannot execute before delay has passed
     function test_Lifecycle_CannotExecuteBeforeDelay() public {
-        bytes memory data = abi.encodeCall(
-            vault.sweep,
-            (IERC20(address(dustToken)), recipient)
-        );
+        bytes memory data = abi.encodeCall(vault.sweep, (IERC20(address(dustToken)), recipient));
 
         vm.prank(admin);
-        timelock.schedule(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0),
-            MIN_DELAY
-        );
+        timelock.schedule(address(vault), 0, data, bytes32(0), bytes32(0), MIN_DELAY);
 
         // Try to execute immediately — should revert
         vm.expectRevert();
@@ -320,29 +253,13 @@ contract TimelockIntegrationTest is Test {
 
     /// @notice Proposer can cancel a scheduled operation
     function test_Lifecycle_CancelScheduledOperation() public {
-        bytes memory data = abi.encodeCall(
-            vault.sweep,
-            (IERC20(address(dustToken)), recipient)
-        );
+        bytes memory data = abi.encodeCall(vault.sweep, (IERC20(address(dustToken)), recipient));
 
         vm.prank(admin);
-        timelock.schedule(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0),
-            MIN_DELAY
-        );
+        timelock.schedule(address(vault), 0, data, bytes32(0), bytes32(0), MIN_DELAY);
 
         // Compute the operation id (same hash the timelock uses)
-        bytes32 opId = timelock.hashOperation(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0)
-        );
+        bytes32 opId = timelock.hashOperation(address(vault), 0, data, bytes32(0), bytes32(0));
         assertTrue(timelock.isOperationPending(opId));
 
         // Admin cancels
@@ -359,20 +276,10 @@ contract TimelockIntegrationTest is Test {
 
     /// @notice Cannot replay an already-executed operation
     function test_Lifecycle_CannotReplayExecutedOperation() public {
-        bytes memory data = abi.encodeCall(
-            vault.sweep,
-            (IERC20(address(dustToken)), recipient)
-        );
+        bytes memory data = abi.encodeCall(vault.sweep, (IERC20(address(dustToken)), recipient));
 
         vm.prank(admin);
-        timelock.schedule(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0),
-            MIN_DELAY
-        );
+        timelock.schedule(address(vault), 0, data, bytes32(0), bytes32(0), MIN_DELAY);
 
         vm.warp(block.timestamp + MIN_DELAY);
         timelock.execute(address(vault), 0, data, bytes32(0), bytes32(0));
@@ -387,20 +294,10 @@ contract TimelockIntegrationTest is Test {
     /// @notice Underlying asset still protected even through timelock sweep
     function test_Security_UnderlyingProtectedThroughTimelock() public {
         // Schedule a sweep of the UNDERLYING asset through timelock
-        bytes memory data = abi.encodeCall(
-            vault.sweep,
-            (IERC20(address(underlying)), attacker)
-        );
+        bytes memory data = abi.encodeCall(vault.sweep, (IERC20(address(underlying)), attacker));
 
         vm.prank(admin);
-        timelock.schedule(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0),
-            MIN_DELAY
-        );
+        timelock.schedule(address(vault), 0, data, bytes32(0), bytes32(0), MIN_DELAY);
 
         vm.warp(block.timestamp + MIN_DELAY);
 
@@ -416,21 +313,11 @@ contract TimelockIntegrationTest is Test {
     function test_Security_NoEscalationThroughTimelock() public {
         // Attacker tries to grant themselves OWNER_ROLE through timelock
         // They can't schedule because they don't have PROPOSER_ROLE
-        bytes memory data = abi.encodeCall(
-            vault.grantRole,
-            (vault.OWNER_ROLE(), attacker)
-        );
+        bytes memory data = abi.encodeCall(vault.grantRole, (vault.OWNER_ROLE(), attacker));
 
         vm.prank(attacker);
         vm.expectRevert();
-        timelock.schedule(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0),
-            MIN_DELAY
-        );
+        timelock.schedule(address(vault), 0, data, bytes32(0), bytes32(0), MIN_DELAY);
 
         assertFalse(vault.isOwner(attacker));
     }
@@ -441,20 +328,10 @@ contract TimelockIntegrationTest is Test {
     function testFuzz_DelayEnforcement(uint256 waitTime) public {
         waitTime = bound(waitTime, 0, MIN_DELAY - 1);
 
-        bytes memory data = abi.encodeCall(
-            vault.sweep,
-            (IERC20(address(dustToken)), recipient)
-        );
+        bytes memory data = abi.encodeCall(vault.sweep, (IERC20(address(dustToken)), recipient));
 
         vm.prank(admin);
-        timelock.schedule(
-            address(vault),
-            0,
-            data,
-            bytes32(0),
-            bytes32(0),
-            MIN_DELAY
-        );
+        timelock.schedule(address(vault), 0, data, bytes32(0), bytes32(0), MIN_DELAY);
 
         vm.warp(block.timestamp + waitTime);
 

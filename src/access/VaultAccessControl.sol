@@ -40,8 +40,9 @@ abstract contract VaultAccessControl is AccessControl {
 
     /// @param owner_ Initial owner address
     constructor(address owner_) {
-        if (owner_ == address(0))
+        if (owner_ == address(0)) {
             revert ActionNotAllowed("Owner cannot be zero address");
+        }
 
         // Grant owner the admin role
         _grantRole(OWNER_ROLE, owner_);
@@ -53,8 +54,9 @@ abstract contract VaultAccessControl is AccessControl {
     /// @dev Only callable by owner
     /// @param guardian Address to grant guardian role
     function grantGuardian(address guardian) external onlyRole(OWNER_ROLE) {
-        if (guardian == address(0))
+        if (guardian == address(0)) {
             revert ActionNotAllowed("Guardian cannot be zero address");
+        }
         _grantRole(GUARDIAN_ROLE, guardian);
     }
 
@@ -69,8 +71,9 @@ abstract contract VaultAccessControl is AccessControl {
     /// @dev Only callable by owner
     /// @param operator Address to grant operator role
     function grantOperator(address operator) external onlyRole(OWNER_ROLE) {
-        if (operator == address(0))
+        if (operator == address(0)) {
             revert ActionNotAllowed("Operator cannot be zero address");
+        }
         _grantRole(OPERATOR_ROLE, operator);
     }
 

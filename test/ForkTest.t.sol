@@ -46,14 +46,7 @@ contract ForkTest is Test {
 
         // Deploy the proxied + timelocked vault using the real USDC address.
         VaultTimelockProxyDeployer deployer = new VaultTimelockProxyDeployer();
-        (vault, timelock) = deployer.deploy(
-            usdc,
-            "Guarded Vault USDC",
-            "gvUSDC",
-            admin,
-            guardian,
-            MIN_DELAY
-        );
+        (vault, timelock) = deployer.deploy(usdc, "Guarded Vault USDC", "gvUSDC", admin, guardian, MIN_DELAY);
 
         vm.startPrank(user);
         deal(USDC, user, DEPOSIT_AMOUNT);

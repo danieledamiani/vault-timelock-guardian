@@ -54,12 +54,7 @@ contract VaultTimelockDeployer {
         address[] memory executors = new address[](1);
         executors[0] = address(0);
 
-        timelock = new TimelockController(
-            minDelay_,
-            proposers,
-            executors,
-            address(0)
-        );
+        timelock = new TimelockController(minDelay_, proposers, executors, address(0));
 
         // Step 3: Grant OWNER_ROLE on the vault to the timelock
         vault.grantRole(vault.OWNER_ROLE(), address(timelock));
